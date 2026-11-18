@@ -10,6 +10,9 @@ unparseable = "unparseable"
 mis = "mis"
 # "PNGs" is split into "PN" + "Gs".
 PN = "PN"
+# Deliberate misspelling: tests/test_profile_extends.py uses it as an unknown top-level key
+# to prove the loader rejects it with a "did you mean model?" suggestion.
+modle = "modle"
 
 [default.extend-identifiers]
 # Deliberate misspellings: these tests prove an unknown key or name is rejected.
