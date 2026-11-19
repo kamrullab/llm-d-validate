@@ -30,8 +30,9 @@ model:
   # value comes from GET /v1/models at runtime. Writing a number here would invent one.
   reasoning:
     # This fleet DOES have a parser, so reasoning arrives in its own field rather than inline --
-    # the opposite of the two-ingress example. That is exactly why the shape is declared, not
-    # assumed.
+    # recent vLLM answers reasoning, while LiteLLM renames it to reasoning_content; measure each
+    # layer. This is the opposite of the two-ingress example. That is exactly why the shape is
+    # declared, not assumed.
     parser: <reasoning-parser>
     field: reasoning_content
     default_on: true

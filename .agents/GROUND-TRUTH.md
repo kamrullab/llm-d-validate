@@ -19,11 +19,14 @@ request as a success. *Assert the finish reason, never the status alone.* This i
 [`assertions/common.py`](../src/llmdv/assertions/common.py) checks `abort` explicitly and every
 surface inherits it.
 
-**Without `--reasoning-parser`, reasoning arrives inline.** It comes as a literal `<think>`
-block inside `content`, and the separate `reasoning_content` field is `null`. A model that
-reasons by default can spend its entire budget there, so `content` is empty on a perfectly
-healthy response. *Assert "content OR the declared reasoning field", never content alone.* The
-profile must declare which shape applies; asserting the wrong one fails a working deployment.
+**Reasoning's response field depends on the serving stack and version.** Recent vLLM puts parsed
+reasoning in `reasoning`; older vLLM puts it in `reasoning_content`. SGLang and LiteLLM also use
+`reasoning_content` (LiteLLM renames the upstream field on the way through). Without a reasoning
+parser, reasoning arrives inline as a literal `<think>` block inside `content`, and the separate
+reasoning field is null. A model that reasons by default can spend its entire budget there, so
+`content` is empty on a perfectly healthy response. *Assert "content OR the declared reasoning
+field", never content alone.* The profile must declare which shape applies; asserting the wrong
+one fails a working deployment.
 
 **The same shape, from the client's side, can be a defect.** The entry above is why
 `assert_has_output` counts reasoning as output -- otherwise a healthy deployment fails. But a
@@ -139,18 +142,19 @@ does, *correlate pod logs by timestamp, not by request id*, and declare `x-reque
 the engine and absent-but-differently-rejected at the gateway. Probe each layer; do not
 generalise from one.
 
-**An error loses its envelope when the endpoint picker is the one rejecting.** Requests that fail
-*body extraction* at the llm-d EPP come back as plain text with `content-type: text/plain` —
-`inference error: BadRequest - error extracting request body: ...` — and no client SDK can parse
-them. Everything the EPP forwards keeps a normal envelope, including a bad `max_tokens`, a prompt
-over the context length and an unknown model.
+**An error can lose its envelope when the endpoint picker is the one rejecting.** On older llm-d EPP
+builds, requests that fail *body extraction* come back as plain text with `content-type:
+text/plain` — `inference error: BadRequest - error extracting request body: ...` — and no client
+SDK can parse them. Newer EPP builds answer the same malformed bodies with a JSON error envelope.
+Measure the build under test. Everything the EPP forwards keeps a normal envelope, including a bad
+`max_tokens`, a prompt over the context length and an unknown model.
 
 So the split is **which component rejected the request**, not engine versus gateway. Reading it as
-"the gateway mangles errors" is wrong and will mislead the next person. As of llm-d-router
-v0.11.0, the body is built unconditionally in `pkg/common/error/error.go`
-(`ir.Body = []byte(err.Error())`), with no configuration knob. *Do not expect a flag to fix it.* The
-profile declares the envelope as correct; the classes go under `unstructured_errors` only after
-the failure has been triaged.
+"the gateway mangles errors" is wrong and will mislead the next person. In the older llm-d-router
+builds, the body was built unconditionally in `pkg/common/error/error.go`
+(`ir.Body = []byte(err.Error())`), with no configuration knob; newer builds answer with an
+envelope. *Do not expect a flag to fix the older behavior.* The profile declares the envelope as
+correct; the classes go under `unstructured_errors` only after the failure has been triaged.
 
 **A gateway load-balances across replicas.** Direct access reaches one replica; the gateway
 may reach any. A difference between the two is not necessarily the gateway — record which

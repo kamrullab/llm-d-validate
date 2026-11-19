@@ -24,9 +24,10 @@ model:
   # MEASURE THIS: /v1/models reports max_model_len. The number below is a placeholder.
   max_model_len: 32768
   reasoning:
-    # MEASURE THIS by sending one request. With --reasoning-parser, reasoning arrives in
-    # reasoning_content: declare the parser and the field. Without one, a thinking model writes an
-    # inline <think> block into content: declare parser null and inline_tag think.
+    # MEASURE THIS by sending one request. With --reasoning-parser, recent vLLM puts reasoning in
+    # reasoning, while older vLLM, SGLang and LiteLLM use reasoning_content: declare the parser and
+    # whichever field you observe. Without one, a thinking model writes an inline <think> block into
+    # content: declare parser null and inline_tag think.
     parser: null
     field: null
     inline_tag: null

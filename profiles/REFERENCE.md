@@ -84,7 +84,7 @@ Declared because asserting the wrong shape fails a healthy fleet. Served without
 | Key | Type | Default | Meaning |
 | --- | --- | --- | --- |
 | `parser` | string or `null` | `null` | The engine's reasoning parser; `null` means none is configured. |
-| `field` | string or `null` | `null` | Response field carrying reasoning, such as `reasoning_content`. |
+| `field` | string or `null` | `null` | Response field carrying reasoning, such as `reasoning`. |
 | `inline_tag` | string or `null` | `null` | Tag wrapping inline reasoning when there is no parser, such as `think`. |
 | `default_on` | bool | `false` | The model reasons without being asked. Raises smoke-test budgets. With a `parser`, the structured-output cases also require reasoning beside the schema answer (`structured_output_reasoning`). |
 
